@@ -3,7 +3,7 @@ runtime-config:
   module: Service
   auth_file: /root/auths.json
   endpoints:
-        - name: peaches
-          module: JitterEntity
-          calibration: '2*{}'
-          initial_value: 0.75
+    - name: peaches
+      module: JitterEntity
+      calibration: '2*{}'
+      initial_value: 0.75

@@ -4,7 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="jitter_plugin"
-dynamic = ["version"]
+# dynamic = ["version"]
+version = "v0.0.1"
+dependencies = [
+    "dripline",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]  # list of folders that contain the packages (["."] by default)
