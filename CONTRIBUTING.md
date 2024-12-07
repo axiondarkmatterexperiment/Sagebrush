@@ -10,12 +10,12 @@ This also applies to fixing a bug that only exists on the develop branch.
 
 1. Create a feature branch
 2. Develop **and test** your feature; for example:
-  1. Do initial development
-  2. Push your branch to GitHub
-  3. Create a *draft* [pull request](https://github.com/axiondarkmatterexperiment/Sagebrush/pulls) (PR) to merge your branch into the *develop* branch
-  4. Perform any tests on your feature
-  5. Make sure the `test_docker` job completes in GitHub Actions
-  6. If necessary, make more changes and repeat 2.4 and 2.5
+    1. Do initial development
+    2. Push your branch to GitHub
+    3. Create a *draft* [pull request](https://github.com/axiondarkmatterexperiment/Sagebrush/pulls) (PR) to merge your branch into the *develop* branch
+    4. Perform any tests on your feature
+    5. Make sure the `test_docker` job completes in GitHub Actions
+    6. If necessary, make more changes and repeat 2.4 and 2.5
 3. Continue steps 2.4 through 2.6 until your feature works
 4. **Do not skip testing**
 5. Convert your PR into a non-draft PR
@@ -27,12 +27,12 @@ This also applies to fixing a bug that only exists on the develop branch.
 
 1. Create a hotfix branch
 2. Develop **and test** your fix; for example:
-  1. Do initial development
-  2. Push your branch to GitHub
-  3. Create a *draft* [pull request](https://github.com/axiondarkmatterexperiment/Sagebrush/pulls) (PR) to merge your branch into the *main* branch
-  4. Perform any tests on your feature
-  5. Make sure the `test_docker` job completes in GitHub Actions
-  6. If necessary, make more changes and repeat 2.4 and 2.5
+    1. Do initial development
+    2. Push your branch to GitHub
+    3. Create a *draft* [pull request](https://github.com/axiondarkmatterexperiment/Sagebrush/pulls) (PR) to merge your branch into the *main* branch
+    4. Perform any tests on your feature
+    5. Make sure the `test_docker` job completes in GitHub Actions
+    6. If necessary, make more changes and repeat 2.4 and 2.5
 3. Continue steps 2.4 through 2.6 until your feature works
 4. **Do not skip testing**
 5. Convert your PR into a non-draft PR
