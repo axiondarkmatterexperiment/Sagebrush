@@ -6,6 +6,11 @@ from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
 from scipy import stats
 
+from dripline.core import Service
+
+__all__ = []
+__all__.append("NetworkAnalyzerFits")
+
 def iq_packed2powers(iq_data):
     """Turn iq data in [r,i,r,i,r,i...] format into an array of powers"""
     powers = np.zeros(int(len(iq_data)/2))
@@ -481,3 +486,6 @@ def find_peaks(vec,fraction,start,stop):
 if __name__=='__main__':
   print("rf_fitting: This module contains functions for curve-fitting network analyzer data to be used in calibrations.")
   print("Standalone fitting capability not implemented yet.")
+
+# TODO
+# class NetworkAnalyzerFits(Service)
