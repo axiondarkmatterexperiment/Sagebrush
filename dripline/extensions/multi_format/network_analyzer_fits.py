@@ -8,8 +8,7 @@ from scipy import stats
 
 from dripline.core import Service
 
-__all__ = []
-__all__.append("NetworkAnalyzerFits")
+__all__ = ['NetworkAnalyzerFits']
 
 def iq_packed2powers(iq_data):
     """Turn iq data in [r,i,r,i,r,i...] format into an array of powers"""
@@ -488,4 +487,5 @@ if __name__=='__main__':
   print("Standalone fitting capability not implemented yet.")
 
 # TODO
-# class NetworkAnalyzerFits(Service)
+# Wrapper class around the fit_transmission and fit_reflection functions for use as a standalone fit service
+# class NetworkAnalyzerFits(Service):
