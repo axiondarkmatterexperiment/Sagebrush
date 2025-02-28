@@ -4,6 +4,8 @@ FROM dripline-python:localCbi
 COPY . /usr/local/src/dripline-python-plugin
 
 WORKDIR /usr/local/src/dripline-python-plugin
+
+RUN pip install pyModbusTCP
 RUN pip install .
 
 WORKDIR /
