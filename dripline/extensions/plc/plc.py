@@ -91,6 +91,7 @@ class plc_bool(Entity):
         self.register = register
         self.bit = bit
         self.n_registers = 1
+        self._check_field = 'value_raw'
 
     @calibrate()
     def on_get(self):
