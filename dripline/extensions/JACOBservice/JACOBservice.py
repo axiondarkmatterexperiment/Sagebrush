@@ -38,8 +38,6 @@ class JACOBService(Service):
     def __init__(self,
                  socket_timeout=1.0,
                  socket_info=('localhost', 1234),
-                 reconnect_test='1',
-                 command_terminator='',
                  response_terminator=None,
                  reply_echo_cmd=False,
                  **kwargs
@@ -69,11 +67,11 @@ class JACOBService(Service):
         self.socket = socket.socket()
         self.socket_timeout = float(socket_timeout)
         self.socket_info = socket_info
-        self.cmd_at_reconnect = cmd_at_reconnect
-        self.reconnect_test = reconnect_test
-        self.command_terminator = command_terminator
-        self.response_terminator = response_terminator
-        self.reply_echo_cmd = reply_echo_cmd
+        #self.cmd_at_reconnect = cmd_at_reconnect
+        #self.reconnect_test = reconnect_test
+        #self.command_terminator = command_terminator
+        #self.response_terminator = response_terminator
+        #self.reply_echo_cmd = reply_echo_cmd
 
         #I could keep these in a config file, but there is only 
         #one JACOB device, so I think it is ok to hardcode them here 
@@ -152,4 +150,4 @@ class JACOBService(Service):
             logger.warning(f"socket.timeout condition met; received:\n{repr(data)}")
             raise ThrowReply('resource_error_no_response', "Timeout while waiting for a response from the instrument")
         logger.debug(repr(data))
-        return data.decode(errors='replace')
+        return data
