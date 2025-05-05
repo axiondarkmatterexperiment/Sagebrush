@@ -16,7 +16,7 @@ class JACOBEntity(Entity):
                  **kwargs):
         '''
         Args:
-            base_str (str): query string to send to jacob
+            cmd_str (str): query string to send to jacob
         '''
         Entity.__init__(self, **kwargs)
         if cmd_str is None:
@@ -75,7 +75,7 @@ class JACOBService(Service):
 
         #I could keep these in a config file, but there is only 
         #one JACOB device, so I think it is ok to hardcode them here 
-        self.add_child(JACOBEntity(name="JACOB_last_error",cmd_str="getLastError()"))
+        #self.add_child(JACOBEntity(name="JACOB_last_error",cmd_str="getLastError()"))
 
         self._reconnect()
 
