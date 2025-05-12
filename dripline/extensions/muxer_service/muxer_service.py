@@ -20,6 +20,9 @@ def piecewise_cal(values_x, values_y, this_x, log_x=False, log_y=False):
     if log_x:
         logger.debug("doing log x cal")
         values_x = [math.log(x) for x in values_x]
+        if this_x <= 0: 
+            logger.warning("invalid value for a log function")
+            return np.inf
         this_x = math.log(this_x)
     if log_y:
         logger.debug("doing log y cal")
