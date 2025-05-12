@@ -24,10 +24,98 @@ class JACOBEntity(Entity):
         else:
             self.cmd_str = cmd_str
 
+    """ Will return just the whole response as a vector of strings"""
     @calibrate()
     def on_get(self):
-        result = self.service.send_to_device(self.cmd_str)
+        result=self.service.send_to_device(self.cmd_str)
+        result = result.split(',')
+        return result
 
+__all__.append('JACOBTemperature')
+class JACOBTemperature(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ Excerpt from JACOB documentation:
+    The return type is String and contains 4 coma separated values.
+    Example: 99270.000000,1.400050,11:41:46.816 06/13/2014,0
+    99270.000000 = the resistance value in ohms for sensor #2
+    1.400050 = the temperature in Kelvin for sensor #2
+    11:41:46.816 06/13/2014 = the time the measurement was recorded
+    0 = Status (See Status Summary)
+    """
+
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        result = result.split(',')
+        return result[1] # return the temperature in Kelvin
+
+__all__.append('JACOBPressure')
+class JACOBPressure(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ Example: readPressure(1) returns a string containing pressure data from the Jacob Gauge #1
+    The return type is String and contains 4 coma separated values.
+    Example: 8.502307,1005.326055,11:48:18.901 06/13/2014,0
+    8.502307 = the pressure value in volts for gauge #1
+    1005.326055 = the pressure in mbar for gauge #1
+    11:48:18.901 06/13/2014 = the time the measurement was recorded
+    0 = Status (See Status Summary
+    """
+
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        result = result.split(',')
+        return result[1] # return the pressure in mbar
+    
+__all__.append('JACOBFlow')
+class JACOBFlow(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ he return type is String and contains 4 coma separated values.
+    Example: 0.002454,0.490856,11:54:33.985 06/13/2014,0
+    0.002454 = the flow value in volts from the flow meter
+    0.490856 = the flow in uMoles/s from the flow meter
+    11:54:33.985 06/13/2014 = the time the measurement was recorded
+    0 = Status (See Status Summary
+    """
+
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        result = result.split(',')
+        return result[1] # return the flow in uMoles/s
 
 
 __all__.append('JACOBService')
