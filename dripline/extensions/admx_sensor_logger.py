@@ -152,15 +152,28 @@ class ADMXSQLTable(SQLTable):
     def __init__(self, *args, **kwargs):
         SQLTable.__init__(self, *args, **kwargs)
 
-    def on_get(self):
+    def get_action(self):
         this_table = self.table_name
         this_column = self.service._sensor_type_match_column
         return_cols = [this_column]
         this_select = sqlalchemy.select(*[getattr(self.table.c,col) for col in return_cols]).order_by(this_column).fetch(1)
         conn = self.service.engine.connect()
         result = conn.execute(this_select)
-        
         list_result = [i for i in result]
+        return list_result
+
+    def on_get(self):
+
+        N_trial = 3
+        for i in range(N_trial):
+          list_result = self.get_action()
+          if len(list_result[0])>0: break
+          else:
+            logger.critical(f'try on_get fail {i}, try reconnect to the database')
+            self.service.connect_to_db(self.service.auth)
+            list_result = self.get_action()
+            
+
         #return {"default":"try default"}
         return  list_result[0][0]
         #return (result.keys(), [i for i in result])
