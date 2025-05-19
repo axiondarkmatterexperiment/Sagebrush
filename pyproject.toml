@@ -12,7 +12,7 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["."]  # list of folders that contain the packages (["."] by default)
-include = ["dripline.extensions"]  # package names should match these glob patterns (["*"] by default)
+include = ["dripline.extensions","sagebrush"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["Dockerfile", "examples"]
 
 [tool.setuptools.dynamic]

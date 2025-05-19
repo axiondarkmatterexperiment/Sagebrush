@@ -1,7 +1,6 @@
-import pyModbusTCP.client
 import ctypes
-from dripline.core import Entity, calibrate, ThrowReply, Service
-#from dripline.implementations import 
+from dripline.core import Entity, calibrate
+from sagebrush.functions import piecewise_cal
 
 
 import logging
@@ -9,29 +8,6 @@ logger = logging.getLogger(__name__)
 
 __all__ = []
 
-def piecewise_cal(values_x, values_y, this_x, log_x=False, log_y=False):
-    if log_x:
-        logger.debug("doing log x cal")
-        values_x = [math.log(x) for x in values_x]
-        this_x = math.log(this_x)
-    if log_y:
-        logger.debug("doing log y cal")
-        values_y = [math.log(y) for y in values_y]
-    try:
-        high_index = [i>this_x for i in values_x].index(True)
-    except ValueError:
-        high_index = -1
-        logger.warning("raw value is above the calibration range, extrapolating")
-        #raise dripline.core.DriplineValueError("raw value is likely above calibration range")
-    if high_index == 0:
-        high_index = 1
-        logger.warning("raw value is below the calibration range, extrapolating")
-        #raise dripline.core.DriplineValueError("raw value is below calibration range")
-    m = (values_y[high_index] - values_y[high_index - 1]) / (values_x[high_index] - values_x[high_index - 1])
-    to_return = values_y[high_index - 1] + m * (this_x - values_x[high_index - 1])
-    if log_y:
-        to_return = math.exp(to_return)
-    return to_return
 
 def mother_dewar_lhe(fraction):
     ''' converts linear position along the sensor to liquid liters of He '''
@@ -46,20 +22,6 @@ def mother_dewar_lhe(fraction):
     values_y = [50.,210.,230.,320.,380.,430.,475.,510.,570.,590.,600.,700.,710.,770.,790.,850.,910.,920.,1010.,1020.,1100.,1110.,1190.,1200.,1240.,1260.,1310.,1390.,1490.,1510.,1540.,1620.,1640.,1720.,1730.,1750.]
     return piecewise_cal(values_x, values_y, fraction)
 
-__all__.append('ModbusService')
-class ModbusService(Service):
-    def __init__(self,
-                 modbus_host=None,
-                 modbus_port=502,
-                 **kwargs):
-        Service.__init__(self,**kwargs)
-        if modbus_host is None:
-            raise ThrowReply("modbus_host is a required configuration parameter for <modbus_service>")
-        self.modbus_client = pyModbusTCP.client.ModbusClient(host=modbus_host, port=modbus_port, auto_open=True)
-
-    def read_holding(self, register, n_registers):
-        logger.debug('calling read_holding_registers({}, {})'.format(register, n_registers))
-        return self.modbus_client.read_holding_registers(register, n_registers)
 
 __all__.append('plc_value')
 class plc_value(Entity):

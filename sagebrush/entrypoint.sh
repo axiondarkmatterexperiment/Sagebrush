@@ -27,7 +27,7 @@ if [[ "$connection" =~ "->" ]]; then
 fi
 rm ${file}
 #}
-
+sleep 3
 # Run whatever the image CMD or `docker run` command is
 
 exec "$@"

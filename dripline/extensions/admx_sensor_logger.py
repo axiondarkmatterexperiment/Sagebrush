@@ -164,7 +164,7 @@ class ADMXSQLTable(SQLTable):
 
     def on_get(self):
 
-        N_trial = 3
+        N_trial = 1
         for i in range(N_trial):
           list_result = self.get_action()
           if len(list_result[0])>0: break
@@ -172,10 +172,11 @@ class ADMXSQLTable(SQLTable):
             logger.critical(f'try on_get fail {i}, try reconnect to the database')
             self.service.connect_to_db(self.service.auth)
             list_result = self.get_action()
-            
 
         #return {"default":"try default"}
-        return  list_result[0][0]
+        result = list_result[0][0]
+        logger.info(f'SQL object get {result}')
+        return result
         #return (result.keys(), [i for i in result])
 
 
