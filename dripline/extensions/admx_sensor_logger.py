@@ -159,7 +159,9 @@ class ADMXSQLTable(SQLTable):
         this_select = sqlalchemy.select(*[getattr(self.table.c,col) for col in return_cols]).order_by(this_column).fetch(1)
         conn = self.service.engine.connect()
         result = conn.execute(this_select)
+        conn.commit()
         list_result = [i for i in result]
+
         return list_result
 
     def on_get(self):
