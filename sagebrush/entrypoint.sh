@@ -1,11 +1,14 @@
 #!/bin/bash
 
 
-#trap cleanup SIGINT SIGTERM EXIT
+##This is a script to close a ghost connection of rabbitmq (if any) before luanching the container
+##Expected enviornment variables set: queue_name, master_host_name, DRIPLINE_USER, DRIPLINE_PASSWORD
+##queue_name: queue name of the service (only expect one return of the connection with the queue_name search)
+##master_host_name: host ip of the rabbitmq
+##DRIPLINE_USER: username of the rabbitmq service
+##DRIPLINE_PASSWORD: password of the rabbitmq service
 
-#cleanup() {
-#queue_name=`echo ${queue_name}`
-#master_host_name=`echo ${master_host_name}`
+
 echo ${queue_name}
 echo ${master_host_name}
 user=`echo $DRIPLINE_USER`
@@ -28,6 +31,5 @@ fi
 rm ${file}
 #}
 sleep 3
-# Run whatever the image CMD or `docker run` command is
 
 exec "$@"
