@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
 
 env:
-  BASE_IMAGE_USER: driplineorg
+  BASE_IMAGE_USER: ghcr.io/driplineorg
   BASE_IMAGE_REPO: dripline-python
-  BASE_IMAGE_VER: 'v5.0.1'
+  BASE_IMAGE_VER: 'v_admx_1'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
