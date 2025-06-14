@@ -44,7 +44,8 @@ jobs:
           context: .
           push: false
           build-args: |
-            img_user= ${{ env.REGISTRY }}/${{ env.BASE_IMAGE_USER }}
+            registry=${{env.REGISTRY}}
+            img_user= ${{ env.BASE_IMAGE_USER }}
             img_repo=${{ env.BASE_IMAGE_REPO }}
             img_tag=${{ env.BASE_IMAGE_TAG }}
           platforms: linux/amd64
@@ -124,7 +125,8 @@ jobs:
           context: .
           push: ${{ github.event_name == 'push' }}  # limited to develop, main, and tags; don't push on PR
           build-args: | 
-            img_user=${{ env.REGISTRY }}/${{ env.BASE_IMAGE_USER }}
+            registry=${{env.REGISTRY}}
+            img_user=${{ env.BASE_IMAGE_USER }}
             img_repo=${{ env.BASE_IMAGE_REPO }}
             img_tag=${{ env.BASE_IMAGE_TAG }}
           tags: ${{ steps.docker_meta.outputs.tags }}
