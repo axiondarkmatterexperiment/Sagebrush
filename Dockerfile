@@ -1,7 +1,7 @@
 ARG registry=ghcr.io
 ARG img_user=driplineorg
 ARG img_repo=dripline-python
-ARG img_tag=v_admxApp_1
+ARG img_tag=v_admx_1
 
 
 FROM ${img_user}/${img_repo}:${img_tag}
