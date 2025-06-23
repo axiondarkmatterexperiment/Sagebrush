@@ -10,6 +10,7 @@ WORKDIR /usr/local/src/dripline-python-plugin
 
 RUN pip install pyModbusTCP
 RUN pip install numpy
+RUN pip install scipy
 COPY . /usr/local/src/sagebrush
 
 WORKDIR /usr/local/src/sagebrush
