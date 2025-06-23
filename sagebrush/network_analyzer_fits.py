@@ -8,7 +8,7 @@ from scipy import stats
 
 from dripline.core import Service
 
-__all__ = ['NetworkAnalyzerFits']
+__all__ = []
 
 def iq_packed2powers(iq_data):
     """Turn iq data in [r,i,r,i,r,i...] format into an array of powers"""
