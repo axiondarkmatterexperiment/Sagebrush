@@ -1,5 +1,5 @@
-ARG registry=ghcr.io
-ARG img_user=driplineorg
+
+ARG img_user=ghcr.io/driplineorg
 ARG img_repo=dripline-python
 ARG img_tag=v_admx_1
 
@@ -14,6 +14,10 @@ COPY . /usr/local/src/sagebrush
 
 WORKDIR /usr/local/src/sagebrush
 RUN pip install .
+RUN apt-get update && apt-get install -y curl
+RUN curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
+   chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/
+
 #RUN apt-get update && apt-get install -y tini && apt-get install -y gdb
 
 WORKDIR /
