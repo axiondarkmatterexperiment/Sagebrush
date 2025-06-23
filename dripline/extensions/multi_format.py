@@ -7,13 +7,8 @@ import asteval
 import yaml
 import json
 from dripline.core import Entity, calibrate, ThrowReply
-import math
 import numpy as np
-import cmath
-from scipy.optimize import least_squares
-from scipy.optimize import curve_fit
-from scipy.interpolate import interp1d
-from scipy import stats
+from sagebrush import network_analyzer_fits as fitting
 
 import logging
 logger = logging.getLogger(__name__)
@@ -526,8 +521,8 @@ def transmission_calibration(data_object):
           }
     """
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-    powers=iq_packed2powers(data_object["iq_data"])
-    fit_norm,fit_f0,fit_Q,fit_noise,fit_chisq,fit_shape=fit_transmission(powers,freqs)
+    powers=fitting.iq_packed2powers(data_object["iq_data"])
+    fit_norm,fit_f0,fit_Q,fit_noise,fit_chisq,fit_shape=fitting.fit_transmission(powers,freqs)
     data_object["fit_norm"]=fit_norm
     data_object["fit_f0"]=fit_f0
     data_object["fit_Q"]=fit_Q
@@ -555,8 +550,8 @@ def sidecar_transmission_calibration(data_object):
           }
     """
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-    powers=iq_packed2powers(data_object["iq_data"])
-    fit_output = sidecar_fit_transmission(powers,freqs)
+    powers=fitting.iq_packed2powers(data_object["iq_data"])
+    fit_output = fitting.sidecar_fit_transmission(powers,freqs)
     data_object["fit_norm"]=fit_output[0]
     data_object["fit_f0"]=fit_output[1]
     data_object["fit_Q"]=fit_output[2]
@@ -584,7 +579,7 @@ def reflection_calibration(data_object):
           }
     """
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-    fit_norm,fit_phase,fit_f0,fit_Q,fit_beta,fit_delay_time,fit_chisq,dip_depth,fit_shape=fit_reflection(data_object["iq_data"],freqs)
+    fit_norm,fit_phase,fit_f0,fit_Q,fit_beta,fit_delay_time,fit_chisq,dip_depth,fit_shape=fitting.fit_reflection(data_object["iq_data"],freqs)
     data_object["fit_norm"]=fit_norm
     data_object["fit_phase"]=fit_phase
     data_object["fit_f0"]=fit_f0
@@ -618,7 +613,7 @@ def sidecar_reflection_calibration(data_object):
                         data_object["stop_frequency"],
                         int(len(data_object["iq_data"])/2))
 
-    fit_output = sidecar_fit_reflection(data_object["iq_data"], freqs)
+    fit_output = fitting.sidecar_fit_reflection(data_object["iq_data"], freqs)
     data_object["fit_norm"] = fit_output[0]
     data_object["fit_phase"] = fit_output[1]
     data_object["fit_f0"] = fit_output[2]
@@ -664,9 +659,9 @@ def widescan_calibration(data_object):
         peak_freqs: <array of frequencies>
           }
     """
-    powers=iq_packed2powers(data_object["iq_data"])
+    powers=fitting.iq_packed2powers(data_object["iq_data"])
     data_fraction=0.05 #5 percent seems to work, change as you please
-    data_object["peaks"]=find_peaks(powers,data_fraction,data_object["start_frequency"],data_object["stop_frequency"]).tolist()
+    data_object["peaks"]=fitting.find_peaks(powers,data_fraction,data_object["start_frequency"],data_object["stop_frequency"]).tolist()
     return data_object
 _all_calibrations.append(widescan_calibration)
 
