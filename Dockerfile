@@ -1,4 +1,3 @@
-
 ARG img_user=ghcr.io/driplineorg
 ARG img_repo=dripline-python
 ARG img_tag=v_admx_1
@@ -12,11 +11,11 @@ WORKDIR /usr/local/src/dripline-python-plugin
 
 RUN pip install pyModbusTCP
 RUN pip install numpy
+RUN pip install scipy
 COPY . /usr/local/src/sagebrush
 
 WORKDIR /usr/local/src/sagebrush
 RUN pip install .
-
 
 #RUN apt-get update && apt-get install -y tini && apt-get install -y gdb
 
