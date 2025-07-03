@@ -24,7 +24,9 @@ def semicolon_array_to_json_object(data_string,label_array):
     #it might crash if 
     split_strings=data_string.split(";")
     data_object={}
-    if len(split_strings)<len(label_array):
+    if len(split_strings)==0:
+        raise dripline.core.DriplineValueError("empty data string received")
+    elif len(split_strings)<len(label_array):
         raise dripline.core.DriplineValueError("not enough values given to fill semicolon_array")
     for i in range(len(label_array)):
         if "," in split_strings[i]: 
@@ -66,6 +68,15 @@ def transmission_calibration(data_object):
         fit_chisq: <number>
           }
     """
+    
+    if data_object is null:
+        data_object = {}
+        data_object["start_frequency"] = -1
+        data_object["stop_frequency"] = -1
+        data_object["iq_data"] = [-1,-1]
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+        
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     powers=fitting.iq_packed2powers(data_object["iq_data"])
     fit_norm,fit_f0,fit_Q,fit_noise,fit_chisq,fit_shape=fitting.fit_transmission(powers,freqs)
@@ -95,6 +106,15 @@ def sidecar_transmission_calibration(data_object):
         fit_chisq: <number>
           }
     """
+    
+    if data_object is null:
+        data_object = {}
+        data_object["start_frequency"] = -1
+        data_object["stop_frequency"] = -1
+        data_object["iq_data"] = [-1,-1]
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+        
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     powers=fitting.iq_packed2powers(data_object["iq_data"])
     fit_output = fitting.sidecar_fit_transmission(powers,freqs)
@@ -124,6 +144,15 @@ def reflection_calibration(data_object):
         fit_chisq: <number>
           }
     """
+    
+    if data_object is null:
+        data_object = {}
+        data_object["start_frequency"] = -1
+        data_object["stop_frequency"] = -1
+        data_object["iq_data"] = [-1,-1]
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+        
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     fit_norm,fit_phase,fit_f0,fit_Q,fit_beta,fit_delay_time,fit_chisq,dip_depth,fit_shape=fitting.fit_reflection(data_object["iq_data"],freqs)
     data_object["fit_norm"]=fit_norm
@@ -155,6 +184,15 @@ def sidecar_reflection_calibration(data_object):
         fit_chisq: <number>
           }
     """
+    
+    if data_object is null:
+        data_object = {}
+        data_object["start_frequency"] = -1
+        data_object["stop_frequency"] = -1
+        data_object["iq_data"] = [-1,-1]
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+        
     freqs = np.linspace(data_object["start_frequency"],
                         data_object["stop_frequency"],
                         int(len(data_object["iq_data"])/2))
@@ -184,6 +222,15 @@ def widescan_calibration(data_object):
         peak_freqs: <array of frequencies>
           }
     """
+    
+    if data_object is null:
+        data_object = {}
+        data_object["start_frequency"] = -1
+        data_object["stop_frequency"] = -1
+        data_object["iq_data"] = [-1,-1]
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+        
     powers=fitting.iq_packed2powers(data_object["iq_data"])
     data_fraction=0.05 #5 percent seems to work, change as you please
     data_object["peaks"]=fitting.find_peaks(powers,data_fraction,data_object["start_frequency"],data_object["stop_frequency"]).tolist()
@@ -222,6 +269,8 @@ class MultiFormatEntity(Entity):
             to_send=to_send+self._get_commands[i]["get_str"]
             get_labels.append(self._get_commands[i]["label"])
         result = self.service.send_to_device([to_send])
+        if result is null or len(result)==0:
+            raise ThrowReply('<{}> failed to get a measurement using get_command(s):\n {}'.format(self.name,to_send))
         return semicolon_array_to_json_object(result,get_labels)
 
     def on_set(self,value): ##value is expected to be in a yaml format
