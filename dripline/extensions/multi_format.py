@@ -114,6 +114,9 @@ def sidecar_transmission_calibration(data_object):
         data_object["iq_data"] = [-1,-1]
         # TODO: Send warning message to logger, then carry on rather than erroring out
         raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
         
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     powers=fitting.iq_packed2powers(data_object["iq_data"])
@@ -152,6 +155,9 @@ def reflection_calibration(data_object):
         data_object["iq_data"] = [-1,-1]
         # TODO: Send warning message to logger, then carry on rather than erroring out
         raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
         
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     fit_norm,fit_phase,fit_f0,fit_Q,fit_beta,fit_delay_time,fit_chisq,dip_depth,fit_shape=fitting.fit_reflection(data_object["iq_data"],freqs)
@@ -192,6 +198,9 @@ def sidecar_reflection_calibration(data_object):
         data_object["iq_data"] = [-1,-1]
         # TODO: Send warning message to logger, then carry on rather than erroring out
         raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
         
     freqs = np.linspace(data_object["start_frequency"],
                         data_object["stop_frequency"],
@@ -230,6 +239,9 @@ def widescan_calibration(data_object):
         data_object["iq_data"] = [-1,-1]
         # TODO: Send warning message to logger, then carry on rather than erroring out
         raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
+    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
+        # TODO: Send warning message to logger, then carry on rather than erroring out
+        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
         
     powers=fitting.iq_packed2powers(data_object["iq_data"])
     data_fraction=0.05 #5 percent seems to work, change as you please
