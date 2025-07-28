@@ -16,11 +16,11 @@ This model will allow individual projects to more naturally add their own custom
 In order to add your own components, you can start with this repo as an example or a template, the steps are:
 
 1. Create a new python package. You can copy the setup.py file and the dripline directory structure from this repo into your own repo for this purpose.
-2. Note that the directory structure requires that the `dripline` directory be empty except for its subdirectory `extensions` and that `extensions` have exactly the `__init__.py` file as is here.
+2. Note that the directory structure requires that the `dripline` directory be empty except for its subdirectory `extensions` ~~and that `extensions` have exactly the `__init__.py` file as is here~~.
 3. The `dripline/extensions/jitter` directory is an example, your plugin should have a different name of your choice.
-4. Within your plugin's folder, the `__init__.py` file must:
-   1. import the classes you've imlemented and define an `__all__` list of the objects you want to add to the namespace
-   2. define a `version` data member which is a scarab.VersionSemantic() instance, here we extract the version from the python package but you can populate that object in whatever method works best for you.
+4. ~~Within your plugin's folder, the `__init__.py` file must:~~
+   1. ~~import the classes you've imlemented and define an `__all__` list of the objects you want to add to the namespace~~
+   2. ~~define a `version` data member which is a scarab.VersionSemantic() instance, here we extract the version from the python package but you can populate that object in whatever method works best for you.~~
 5. Optionally, copy the Dockerfile, make sure that the copy and working directory location used are unique to your plugin and confirm that the base image tag is current (or at least that you're happy with that version).
 6. Implement your custom classes and run your service in the usual way, `dl-serve` will be able to find them as it creates the class instances in the usual way.
 
