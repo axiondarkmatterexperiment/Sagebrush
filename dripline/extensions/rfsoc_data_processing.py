@@ -40,7 +40,11 @@ class RfsocDataProcessing(Entity):
         reflection_fit = fitting.fit_reflection(reflection_powers,reflection_freqs)
 
         snr = tone_powers/interpolated_spectrum[tone_indices]
-        
+        new_amps = np.sqrt(10/snr)
+        new_transmission_amps = new_amps[::2]
+        new_reflection_amps = new_amps[1::2]
+
+        return interpolated_spectrum,transmission_fit,reflection_fit,new_transmission_amps,new_reflection_amps
 
         
 
