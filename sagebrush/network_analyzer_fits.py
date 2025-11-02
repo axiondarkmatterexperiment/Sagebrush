@@ -6,8 +6,6 @@ from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
 from scipy import stats
 
-from dripline.core import Service
-
 __all__ = []
 
 def iq_packed2powers(iq_data):
@@ -232,15 +230,23 @@ def fit_transmission(powers,frequencies):
     if len(frequencies)<16:
         raise ValueError("not enough points to fit transmission, need 16, got {}".format(len(powers)))
 
-    f0_guess=frequencies[int(math.floor(len(frequencies)/2))]
+    f0_guess=frequencies[np.argmax(powers)]
     f_band=frequencies[-1]-frequencies[0]
     norm_guess=max(powers)
     Q_min=f0_guess/f_band
-    Q_max=20*Q_min
+    if min(powers)/max(powers) < 0.02:
+        # Empirical guess. Creates better fits for low-response measurements
+        Q_max=50*Q_min 
+    else:
+        Q_max=20*Q_min
     Q_guess=0.5*(Q_max+Q_min)
     ten_percent_mark=int(math.ceil(0.1*len(frequencies)))
     noise_guess=0.5*(np.mean(powers[0:ten_percent_mark]+np.mean(powers[len(powers)-ten_percent_mark:len(powers)])))/norm_guess
     uncertainty=0.5*(np.std(powers[0:ten_percent_mark]+np.std(powers[len(powers)-ten_percent_mark:len(powers)])))
+    if min(powers)/max(powers) < 0.02:
+        # Relaxes search space. Better fits for low-response measurements
+        noise_guess = 0.1*noise_guess
+        uncertainty = 10*uncertainty
     norm_guess=max(powers)-noise_guess
     p0=[norm_guess,f0_guess,Q_guess,noise_guess]
     def fit_fcn(x):
@@ -273,7 +279,7 @@ def fit_transmission(powers,frequencies):
             noise=0
         if noise>0.1:
             resid[nfreq+2]=(noise-0.1)
-            #note I do not clamp noise, it is possible it gets this high, jsut undesirable
+            #note I do not clamp noise, it is possible it gets this high, just undesirable
         for i in range(nfreq):
             yp=transmission_power_shape(frequencies[i],norm,f0,Q,noise)
             resid[i]=(yp-powers[i])/uncertainty
@@ -283,8 +289,16 @@ def fit_transmission(powers,frequencies):
     chisq=res.cost/len(powers)
     #contsruct the fit shape
     fit_shape=[ transmission_power_shape(f,res.x[0],res.x[1],res.x[2],res.x[3]) for f in frequencies ]
+
     #return norm,f0,Q,noise, chi square, fit shape
-    return [res.x[0],res.x[1],res.x[2],res.x[3],chisq,fit_shape]
+    to_return = {}
+    to_return["fit_norm"] = res.x[0]
+    to_return["fit_f0"] = res.x[1]
+    to_return["fit_Q"] = res.x[2]
+    to_return["fit_noise"] = res.x[3]
+    to_return["fit_chisq"] = chisq
+    to_return["fit_shape"] = fit_shape
+    return to_return
 
 
 def fit_reflection(iq_data,frequencies):
@@ -302,7 +316,6 @@ def fit_reflection(iq_data,frequencies):
         raise ValueError("not enough points to fit transmission, need 16, got {}".format(len(powers)))
 
     powers=iq_packed2powers(iq_data)
-#print("powers {}".format(powers))
     min_loc=np.argmin(powers)
     f0_guess=frequencies[min_loc]
     f_band=frequencies[-1]-frequencies[0]
@@ -339,11 +352,21 @@ def fit_reflection(iq_data,frequencies):
     fit_shape = fit_fcn(frequencies,*par) 
     #fit_shape = fit_fcn(frequencies,*par) 
     chisq=sum(np.power(np.abs(fit_shape-np.array(iq_data))/uncertainty,2))/len(frequencies)
-    #TODO at this point change to dict
-    #return norm,phase,f0,Q,beta,delay_time,chi-square of fit
-    return [par[0],par[1],par[2],par[3],par[4],par[5],chisq,dip_depth,list(fit_shape)]
+    
+    # return
+    to_return = {}
+    to_return["fit_norm"] = par[0]
+    to_return["fit_phase"] = par[1]
+    to_return["fit_f0"] = par[2]
+    to_return["fit_Q"] = par[3]
+    to_return["fit_beta"] = par[4]
+    to_return["fit_delay_time"] = par[5]
+    to_return["fit_chisq"] = chisq
+    to_return["fit_shape"] = list(fit_shape)
+    to_return["dip_depth"] = dip_depth
+    return to_return
 
-def sidecar_fit_transmission(powers, frequencies):
+def sidecar_fit_transmission(powers, frequencies, logger):
     """fits sidecar reflection data. For now, it is separate function from 
     the main experiment so as not to disturb it.
     Gamma is the measured reflection coefficient"""
@@ -388,7 +411,7 @@ def search_sign(f0,frequencies,phases):
     else:
         return -1
     
-def sidecar_fit_reflection(iq_data, frequencies):
+def sidecar_fit_reflection(iq_data, frequencies, logger):
     """fits sidecar reflection data. For now, it is separate function from 
     the main experiment so as not to disturb it.
     Gamma is the measured reflection coefficient"""
@@ -482,10 +505,62 @@ def find_peaks(vec,fraction,start,stop):
     peak_centroids.append(int(0.5*( peak_start+sorted_max_indices[-1])))
     return np.interp(peak_centroids,[0,len(vec)],[start,stop])
 
-if __name__=='__main__':
-  print("rf_fitting: This module contains functions for curve-fitting network analyzer data to be used in calibrations.")
-  print("Standalone fitting capability not implemented yet.")
 
-# TODO
-# Wrapper class around the fit_transmission and fit_reflection functions for use as a standalone fit service
-# class NetworkAnalyzerFits(Service):
+def fit_na_log(log_entry):
+    if type(log_entry) is dict:
+        # Process like a tabular database entry
+        row_index = 1 # Should be 3 rows. 1st row is formatting; last row is metadata
+        fftkey = log_entry.keys()[4]
+        iqdata = log_entry[fftkey][row_index]
+        iqdata = (iqdata.split("{")[1]).split("}")[0]
+        iqdata = [float(x) for x in iqdata.split(",")]
+
+        namekey = log_entry.keys()[6]
+        measurement_type = log_entry[namekey][row_index]   
+        startfreq = log_entry[' start_frequency '][row_index]
+        stopfreq = log_entry[' stop_frequency '][row_index]
+    elif type(log_entry) is list:
+        # Process by index. Assume it's still a whole row.
+        iqdata = log_entry[4]
+        iqdata = (iqdata.split("{")[1]).split("}")[0]
+        iqdata = [float(x) for x in iqdata.split(",")]
+
+        measurement_type = log_entry[6]
+        startfreq = log_entry[1]
+        stopfreq = log_entry[2]
+    else:
+        print("I don't recognize this log format. Please provide a NA log database row as either a dict or list")
+        return None
+    
+    freqs=np.linspace(startfreq,stopfreq,int(len(iqdata)/2))
+    if "reflection" in measurement_type:
+        print("Attempting to fit a reflection measurement")
+        fit_dict = fit_reflection(iqdata,freqs)
+        fit_dict["type"] = "Reflection"
+        fit_dict["iq_fit_shape"] = fit_dict["fit_shape"]
+        fit_dict["fit_shape"] = iq_packed2powers(fit_dict["iq_fit_shape"])
+    elif "transmission" in measurement_type:
+        print("Attempting to fit a transmission measurement")
+        powers = iq_packed2powers(iqdata)
+        fit_dict = fit_transmission(powers,freqs)
+        fit_dict["type"] = "Transmission"
+    elif "widescan" in measurement_type:
+        print("Attempting to fit a widescan measurement")
+        powers=iq_packed2powers(iqdata)
+        data_fraction=0.05 #5 percent seems to work, change as you please
+        fit_dict = {}
+        fit_dict["peaks"]=find_peaks(powers,data_fraction,startfreq,stopfreq).tolist()
+    else:
+        print("I don't recognize this measurement type: {}".format(measurement_type))
+        return None
+
+    return fit_dict
+
+if __name__=='__main__':
+  print("network_analyzer_fits: This module perfoms least-squares fits of network analyzer data for use in calibrations and diagnostics.")
+  print("To execute a standalone fit, call this module's fit_na_log(<NA log database entry*>)")
+  print("   *Pass the full database entry row as a list")
+  print("Alternatively, call the appropriate fit using the raw NA data:")
+  print("    ref_fit_dict = fit_reflection(iq_data,frequencies)")
+  print("    trans_fit_dict = fit_transmission(powers,frequencies)")
+  print("        *powers can be calculated by calling network_analyzer_fits.iq_packed2powers(iq_data)")
