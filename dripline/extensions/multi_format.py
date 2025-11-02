@@ -69,7 +69,7 @@ def transmission_calibration(data_object):
           }
     """
     
-    if data_object is null:
+    if data_object is None:
         data_object = {}
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
@@ -79,13 +79,18 @@ def transmission_calibration(data_object):
         
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     powers=fitting.iq_packed2powers(data_object["iq_data"])
-    fit_norm,fit_f0,fit_Q,fit_noise,fit_chisq,fit_shape=fitting.fit_transmission(powers,freqs)
-    data_object["fit_norm"]=fit_norm
-    data_object["fit_f0"]=fit_f0
-    data_object["fit_Q"]=fit_Q
-    data_object["fit_noise"]=fit_noise
-    data_object["fit_chisq"]=fit_chisq
-    data_object["fit_shape"]=fit_shape
+    fit_dict=fitting.fit_transmission(powers,freqs)
+    data_object["fit_norm"]=fit_dict["fit_norm"]
+    data_object["fit_f0"]=fit_dict["fit_f0"]
+    data_object["fit_Q"]=fit_dict["fit_Q"]
+    data_object["fit_noise"]=fit_dict["fit_noise"]
+    data_object["fit_chisq"]=fit_dict["fit_chisq"]
+    data_object["fit_shape"]=fit_dict["fit_shape"]
+
+    # Semi-arbitrary chi-squared threshold. Change as necessary to minimize false alarms
+    if data_object["fit_chisq"] > 25:
+        logger.warning("Chi-squared is high ({}), recommend checking fit quality".format(data_object["fit_chisq"]))
+    
     return data_object
 #return data
 _all_calibrations.append(transmission_calibration)
@@ -107,7 +112,7 @@ def sidecar_transmission_calibration(data_object):
           }
     """
     
-    if data_object is null:
+    if data_object is None:
         data_object = {}
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
@@ -120,7 +125,7 @@ def sidecar_transmission_calibration(data_object):
         
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     powers=fitting.iq_packed2powers(data_object["iq_data"])
-    fit_output = fitting.sidecar_fit_transmission(powers,freqs)
+    fit_output = fitting.sidecar_fit_transmission(powers,freqs,logger)
     data_object["fit_norm"]=fit_output[0]
     data_object["fit_f0"]=fit_output[1]
     data_object["fit_Q"]=fit_output[2]
@@ -138,7 +143,7 @@ def reflection_calibration(data_object):
         stop_frequency: <number>
         iq_data: <array of numbers, packed i,r,i,r>
             }
-        and augments it with a transmission fit
+        and augments it with a reflection fit
           {
         fit_f0: <number>
         fit_Q: <number>
@@ -148,7 +153,7 @@ def reflection_calibration(data_object):
           }
     """
     
-    if data_object is null:
+    if data_object is None:
         data_object = {}
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
@@ -160,16 +165,21 @@ def reflection_calibration(data_object):
         raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
         
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-    fit_norm,fit_phase,fit_f0,fit_Q,fit_beta,fit_delay_time,fit_chisq,dip_depth,fit_shape=fitting.fit_reflection(data_object["iq_data"],freqs)
-    data_object["fit_norm"]=fit_norm
-    data_object["fit_phase"]=fit_phase
-    data_object["fit_f0"]=fit_f0
-    data_object["fit_Q"]=fit_Q
-    data_object["fit_beta"]=fit_beta
-    data_object["fit_delay_time"]=fit_delay_time
-    data_object["fit_chisq"]=fit_chisq
-    data_object["fit_shape"]=fit_shape
-    data_object["dip_depth"]=dip_depth
+    fit_dict=fitting.fit_reflection(data_object["iq_data"],freqs)
+    data_object["fit_norm"]=fit_dict["fit_norm"]
+    data_object["fit_phase"]=fit_dict["fit_phase"]
+    data_object["fit_f0"]=fit_dict["fit_f0"]
+    data_object["fit_Q"]=fit_dict["fit_Q"]
+    data_object["fit_beta"]=fit_dict["fit_beta"]
+    data_object["fit_delay_time"]=fit_dict["fit_delay_time"]
+    data_object["fit_chisq"]=fit_dict["fit_chisq"]
+    data_object["fit_shape"]=fit_dict["fit_shape"]
+    data_object["dip_depth"]=fit_dict["dip_depth"]
+    
+    # Semi-abritrary chi-squared threshold. Change as necessary to minimize false alarms
+    if data_object["fit_chisq"] > 25:
+        logger.warning("Chi-squared is high ({}), recommend checking fit quality".format(data_object["fit_chisq"]))
+    
     return data_object
 _all_calibrations.append(reflection_calibration)
 
@@ -191,7 +201,7 @@ def sidecar_reflection_calibration(data_object):
           }
     """
     
-    if data_object is null:
+    if data_object is None:
         data_object = {}
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
@@ -206,7 +216,7 @@ def sidecar_reflection_calibration(data_object):
                         data_object["stop_frequency"],
                         int(len(data_object["iq_data"])/2))
 
-    fit_output = fitting.sidecar_fit_reflection(data_object["iq_data"], freqs)
+    fit_output = fitting.sidecar_fit_reflection(data_object["iq_data"], freqs, logger)
     data_object["fit_norm"] = fit_output[0]
     data_object["fit_phase"] = fit_output[1]
     data_object["fit_f0"] = fit_output[2]
@@ -232,7 +242,7 @@ def widescan_calibration(data_object):
           }
     """
     
-    if data_object is null:
+    if data_object is None:
         data_object = {}
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
@@ -281,7 +291,7 @@ class MultiFormatEntity(Entity):
             to_send=to_send+self._get_commands[i]["get_str"]
             get_labels.append(self._get_commands[i]["label"])
         result = self.service.send_to_device([to_send])
-        if result is null or len(result)==0:
+        if result is None or len(result)==0:
             raise ThrowReply('<{}> failed to get a measurement using get_command(s):\n {}'.format(self.name,to_send))
         return semicolon_array_to_json_object(result,get_labels)
 
