@@ -97,6 +97,7 @@ def sidecar_transmission_calibration(data_object):
     """
     freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
     powers=fitting.iq_packed2powers(data_object["iq_data"])
+    logger.warning(f"test sidecar_fit_transmission")
     fit_output = fitting.sidecar_fit_transmission(powers,freqs)
     data_object["fit_norm"]=fit_output[0]
     data_object["fit_f0"]=fit_output[1]
@@ -104,6 +105,7 @@ def sidecar_transmission_calibration(data_object):
     data_object["fit_noise"]=fit_output[3]
     data_object["fit_chisq"]=fit_output[4]
     data_object["fit_shape"]=fit_output[5]
+    logger.warning(f"test sidecar_fit_transmission {fit_output[:4]}")
     return data_object
 #return data
 _all_calibrations.append(sidecar_transmission_calibration)
@@ -159,7 +161,8 @@ def sidecar_reflection_calibration(data_object):
                         data_object["stop_frequency"],
                         int(len(data_object["iq_data"])/2))
 
-    fit_output = fitting.sidecar_fit_reflection(data_object["iq_data"], freqs)
+    logger.warning(f"test sidecar_fit_reflection")
+    fit_output = fitting.fit_reflection(data_object["iq_data"], freqs)
     data_object["fit_norm"] = fit_output[0]
     data_object["fit_phase"] = fit_output[1]
     data_object["fit_f0"] = fit_output[2]
@@ -167,8 +170,8 @@ def sidecar_reflection_calibration(data_object):
     data_object["fit_beta"] = fit_output[4]
     data_object["fit_delay_time"] = fit_output[5]
     data_object["fit_chisq"] = fit_output[6]
-    data_object["fit_shape"] = fit_output[7]
-    data_object["dip_depth"] = fit_output[8]
+    data_object["dip_depth"] = fit_output[7]
+    data_object["fit_shape"] = fit_output[8]
     return data_object
 _all_calibrations.append(sidecar_reflection_calibration)
     
