@@ -175,11 +175,9 @@ class ADMXSQLTable(SQLTable):
             self.service.connect_to_db(self.service.auth)
             list_result = self.get_action()
 
-        #return {"default":"try default"}
         result = list_result[0][0]
         logger.info(f'SQL object get {result}')
         return result
-        #return (result.keys(), [i for i in result])
 
 
 
