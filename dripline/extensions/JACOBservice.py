@@ -1,6 +1,7 @@
 import re
 import socket
 import threading
+import time
 
 from dripline.core import Service, ThrowReply, Entity, calibrate
 
@@ -58,6 +59,9 @@ class JACOBTemperature(Entity):
     def on_get(self):
         result=self.service.send_to_device(self.cmd_str)
         result = result.split(',')
+        if len(result)!=4:
+            logger.warning("response to temperature invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to temperature request")
         return result[1] # return the temperature in Kelvin
 
 __all__.append('JACOBPressure')
@@ -87,6 +91,10 @@ class JACOBPressure(Entity):
     def on_get(self):
         result=self.service.send_to_device(self.cmd_str)
         result = result.split(',')
+        if len(result)!=4:
+            logger.warning("response to pressure invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pressure request")
+
         return result[1] # return the pressure in mbar
     
 __all__.append('JACOBFlow')
@@ -115,6 +123,11 @@ class JACOBFlow(Entity):
     def on_get(self):
         result=self.service.send_to_device(self.cmd_str)
         result = result.split(',')
+        if len(result)!=4:
+            logger.warning("response to flow invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to flow request")
+
+
         return result[1] # return the flow in uMoles/s
 
 
@@ -192,6 +205,7 @@ class JACOBService(Service):
         self.alock.acquire()
 
         try:
+            time.sleep(0.2)
             data = self._send_command(command)
         except socket.error as err:
             logger.warning(f"socket.error <{err}> received, attempting reconnect")
