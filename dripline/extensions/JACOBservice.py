@@ -151,7 +151,11 @@ class JACOBValve(Entity):
             raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
         else:
             self.cmd_str = cmd_str
-    """ This isn't documented in the manual, but the command is readValveStatus(2)"""
+    """The return type is String and contains 3 coma separated values.
+       Example: 0,11:41:46.816 06/13/2014,0
+       0 = the status of V1 (1 = Open, 0 = Closed)
+       11:41:46.816 06/13/2014 = The time the command was sent
+       0 = Status (See Status Summary)"""
     @calibrate()
     def on_get(self):
         result=self.service.send_to_device(self.cmd_str)
