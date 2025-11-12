@@ -164,6 +164,84 @@ class JACOBValve(Entity):
         logger.debug("Valve status response: {}".format(result))
         return result[0] # return the valve status (0=closed, 1=open)
 
+__all__.append('JACOBPumpStatus')
+class JACOBPumpStatus(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ This isn't documented in the manual, but the command is getPumpState(0)"""
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        if len(result)==0:
+            logger.warning("response to pump status invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pump status request")
+
+        #Response is status,warn,error
+        logger.debug("Pump status response: {}".format(result))
+        return result.split(',')[0] # return the pump status (0=stopped, 1=running?)
+
+__all__.append('JACOBPumpWarn')
+class JACOBPumpWarn(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ This isn't documented in the manual, but the command is getPumpState(0)"""
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        if len(result)==0:
+            logger.warning("response to pump status invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pump status request")
+
+        #Response is status,warn,error
+        logger.debug("Pump status response: {}".format(result))
+        return result.split(',')[1] # return the pump status (0=stopped, 1=running?)
+
+__all__.append('JACOBPumpError')
+class JACOBPumpError(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ This isn't documented in the manual, but the command is getPumpState(0)"""
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        if len(result)==0:
+            logger.warning("response to pump status invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pump status request")
+
+        #Response is status,warn,error
+        logger.debug("Pump status response: {}".format(result))
+        return result.split(',')[2] # return the pump status (0=stopped, 1=running?)
+
 
 __all__.append('JACOBFlow')
 class JACOBFlow(Entity):
