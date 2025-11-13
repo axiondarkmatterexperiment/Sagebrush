@@ -9,8 +9,9 @@ RUN curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.
    chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/
 WORKDIR /usr/local/src/dripline-python-plugin
 
+RUN pip install --upgrade pip
 RUN pip install pyModbusTCP
-RUN pip install numpy
+#RUN pip install numpy
 RUN pip install scipy
 COPY . /usr/local/src/sagebrush
 
