@@ -74,25 +74,37 @@ def transmission_calibration(data_object):
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
         data_object["iq_data"] = [-1,-1]
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
-        
-    freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-    powers=fitting.iq_packed2powers(data_object["iq_data"])
-    fit_dict=fitting.fit_transmission(powers,freqs)
-    data_object["fit_norm"]=fit_dict["fit_norm"]
-    data_object["fit_f0"]=fit_dict["fit_f0"]
-    data_object["fit_Q"]=fit_dict["fit_Q"]
-    data_object["fit_noise"]=fit_dict["fit_noise"]
-    data_object["fit_chisq"]=fit_dict["fit_chisq"]
-    data_object["fit_shape"]=fit_dict["fit_shape"]
-
-    # Semi-arbitrary chi-squared threshold. Change as necessary to minimize false alarms
-    if data_object["fit_chisq"] > 25:
-        logger.warning("Chi-squared is high ({}), recommend checking fit quality".format(data_object["fit_chisq"]))
+        data_object["fit_norm"]=-1
+        data_object["fit_f0"]=-1
+        data_object["fit_Q"]=-1
+        data_object["fit_noise"]=-1
+        data_object["fit_chisq"]=-1
+        data_object["fit_shape"]=-1
+        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+        # logger.warning("Invalid data_object received; unable to fit")
+    else:
+        try:
+            freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
+            powers=fitting.iq_packed2powers(data_object["iq_data"])
+            fit_dict=fitting.fit_transmission(powers,freqs)
+            data_object["fit_norm"]=fit_dict["fit_norm"]
+            data_object["fit_f0"]=fit_dict["fit_f0"]
+            data_object["fit_Q"]=fit_dict["fit_Q"]
+            data_object["fit_noise"]=fit_dict["fit_noise"]
+            data_object["fit_chisq"]=fit_dict["fit_chisq"]
+            data_object["fit_shape"]=fit_dict["fit_shape"]
+        except:
+            data_object["fit_norm"]=-1
+            data_object["fit_f0"]=-1
+            data_object["fit_Q"]=-1
+            data_object["fit_noise"]=-1
+            data_object["fit_chisq"]=-1
+            data_object["fit_shape"]=-1
+            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+            # logger.warning("Transmission fit failed to converge. Check IQ data")
     
     return data_object
-#return data
+
 _all_calibrations.append(transmission_calibration)
 
 def sidecar_transmission_calibration(data_object):
@@ -117,23 +129,37 @@ def sidecar_transmission_calibration(data_object):
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
         data_object["iq_data"] = [-1,-1]
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
-    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
-        
-    freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-    powers=fitting.iq_packed2powers(data_object["iq_data"])
-    fit_output = fitting.sidecar_fit_transmission(powers,freqs,logger)
-    data_object["fit_norm"]=fit_output[0]
-    data_object["fit_f0"]=fit_output[1]
-    data_object["fit_Q"]=fit_output[2]
-    data_object["fit_noise"]=fit_output[3]
-    data_object["fit_chisq"]=fit_output[4]
-    data_object["fit_shape"]=fit_output[5]
+        data_object["fit_norm"]=-1
+        data_object["fit_f0"]=-1
+        data_object["fit_Q"]=-1
+        data_object["fit_noise"]=-1
+        data_object["fit_chisq"]=-1
+        data_object["fit_shape"]=-1
+        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+        # logger.warning("Invalid data_object received; unable to fit")
+    else:
+        try:
+            freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
+            powers=fitting.iq_packed2powers(data_object["iq_data"])
+            fit_dict=fitting.sidecar_fit_transmission(powers,freqs)
+            data_object["fit_norm"]=fit_dict["fit_norm"]
+            data_object["fit_f0"]=fit_dict["fit_f0"]
+            data_object["fit_Q"]=fit_dict["fit_Q"]
+            data_object["fit_noise"]=fit_dict["fit_noise"]
+            data_object["fit_chisq"]=fit_dict["fit_chisq"]
+            data_object["fit_shape"]=fit_dict["fit_shape"]
+        except:
+            data_object["fit_norm"]=-1
+            data_object["fit_f0"]=-1
+            data_object["fit_Q"]=-1
+            data_object["fit_noise"]=-1
+            data_object["fit_chisq"]=-1
+            data_object["fit_shape"]=-1
+            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+            # logger.warning("Transmission fit failed to converge. Check IQ data")
+    
     return data_object
-#return data
+
 _all_calibrations.append(sidecar_transmission_calibration)
     
 def reflection_calibration(data_object):
@@ -158,29 +184,43 @@ def reflection_calibration(data_object):
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
         data_object["iq_data"] = [-1,-1]
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
-    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
-        
-    freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-    fit_dict=fitting.fit_reflection(data_object["iq_data"],freqs)
-    data_object["fit_norm"]=fit_dict["fit_norm"]
-    data_object["fit_phase"]=fit_dict["fit_phase"]
-    data_object["fit_f0"]=fit_dict["fit_f0"]
-    data_object["fit_Q"]=fit_dict["fit_Q"]
-    data_object["fit_beta"]=fit_dict["fit_beta"]
-    data_object["fit_delay_time"]=fit_dict["fit_delay_time"]
-    data_object["fit_chisq"]=fit_dict["fit_chisq"]
-    data_object["fit_shape"]=fit_dict["fit_shape"]
-    data_object["dip_depth"]=fit_dict["dip_depth"]
-    
-    # Semi-abritrary chi-squared threshold. Change as necessary to minimize false alarms
-    if data_object["fit_chisq"] > 25:
-        logger.warning("Chi-squared is high ({}), recommend checking fit quality".format(data_object["fit_chisq"]))
+        data_object["fit_norm"]=-1
+        data_object["fit_f0"]=-1
+        data_object["fit_Q"]=-1
+        data_object["fit_beta"]=-1
+        data_object["fit_delay_time"]=-1
+        data_object["fit_chisq"]=-1
+        data_object["fit_shape"]=-1
+        data_object["dip_depth"]=-1
+        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+        # logger.warning("Invalid data_object received; unable to fit")
+    else:
+        try:
+            freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
+            fit_dict=fitting.fit_reflection(data_object["iq_data"],freqs)
+            data_object["fit_norm"]=fit_dict["fit_norm"]
+            data_object["fit_phase"]=fit_dict["fit_phase"]
+            data_object["fit_f0"]=fit_dict["fit_f0"]
+            data_object["fit_Q"]=fit_dict["fit_Q"]
+            data_object["fit_beta"]=fit_dict["fit_beta"]
+            data_object["fit_delay_time"]=fit_dict["fit_delay_time"]
+            data_object["fit_chisq"]=fit_dict["fit_chisq"]
+            data_object["fit_shape"]=fit_dict["fit_shape"]
+            data_object["dip_depth"]=fit_dict["dip_depth"]
+        except:
+            data_object["fit_norm"]=-1
+            data_object["fit_f0"]=-1
+            data_object["fit_Q"]=-1
+            data_object["fit_beta"]=-1
+            data_object["fit_delay_time"]=-1
+            data_object["fit_chisq"]=-1
+            data_object["fit_shape"]=-1
+            data_object["dip_depth"]=-1
+            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+            # logger.warning("Reflection fit failed to converge. Check IQ data")
     
     return data_object
+
 _all_calibrations.append(reflection_calibration)
 
 
@@ -206,27 +246,43 @@ def sidecar_reflection_calibration(data_object):
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
         data_object["iq_data"] = [-1,-1]
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
-    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
-        
-    freqs = np.linspace(data_object["start_frequency"],
-                        data_object["stop_frequency"],
-                        int(len(data_object["iq_data"])/2))
-
-    fit_output = fitting.sidecar_fit_reflection(data_object["iq_data"], freqs, logger)
-    data_object["fit_norm"] = fit_output[0]
-    data_object["fit_phase"] = fit_output[1]
-    data_object["fit_f0"] = fit_output[2]
-    data_object["fit_Q"] = fit_output[3]
-    data_object["fit_beta"] = fit_output[4]
-    data_object["fit_delay_time"] = fit_output[5]
-    data_object["fit_chisq"] = fit_output[6]
-    data_object["fit_shape"] = fit_output[7]
-    data_object["dip_depth"] = fit_output[8]
+        data_object["fit_norm"]=-1
+        data_object["fit_f0"]=-1
+        data_object["fit_Q"]=-1
+        data_object["fit_beta"]=-1
+        data_object["fit_delay_time"]=-1
+        data_object["fit_chisq"]=-1
+        data_object["fit_shape"]=-1
+        data_object["dip_depth"]=-1
+        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+        # logger.warning("Invalid data_object received; unable to fit")
+    else:
+        try:
+            freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
+            fit_dict=fitting.sidecar_fit_reflection(data_object["iq_data"],freqs)
+            data_object["fit_norm"]=fit_dict["fit_norm"]
+            data_object["fit_phase"]=fit_dict["fit_phase"]
+            data_object["fit_f0"]=fit_dict["fit_f0"]
+            data_object["fit_Q"]=fit_dict["fit_Q"]
+            data_object["fit_beta"]=fit_dict["fit_beta"]
+            data_object["fit_delay_time"]=fit_dict["fit_delay_time"]
+            data_object["fit_chisq"]=fit_dict["fit_chisq"]
+            data_object["fit_shape"]=fit_dict["fit_shape"]
+            data_object["dip_depth"]=fit_dict["dip_depth"]
+        except:
+            data_object["fit_norm"]=-1
+            data_object["fit_f0"]=-1
+            data_object["fit_Q"]=-1
+            data_object["fit_beta"]=-1
+            data_object["fit_delay_time"]=-1
+            data_object["fit_chisq"]=-1
+            data_object["fit_shape"]=-1
+            data_object["dip_depth"]=-1
+            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
+            # logger.warning("Reflection fit failed to converge. Check IQ data")
+    
     return data_object
+
 _all_calibrations.append(sidecar_reflection_calibration)
     
 def widescan_calibration(data_object):
@@ -247,16 +303,16 @@ def widescan_calibration(data_object):
         data_object["start_frequency"] = -1
         data_object["stop_frequency"] = -1
         data_object["iq_data"] = [-1,-1]
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; null data_object received")
-    elif "start_frequency" not in data_object.keys() or "stop_frequency" not in data_object.keys() or "iq_data" not in data_object.keys():
-        # TODO: Send warning message to logger, then carry on rather than erroring out
-        raise dripline.core.DriplineValueError("cannot perform calibration; incomplete data_object received")
-        
-    powers=fitting.iq_packed2powers(data_object["iq_data"])
-    data_fraction=0.05 #5 percent seems to work, change as you please
-    data_object["peaks"]=fitting.find_peaks(powers,data_fraction,data_object["start_frequency"],data_object["stop_frequency"]).tolist()
+        data_object["peaks"] = [-1]
+    else:
+        try:    
+            powers=fitting.iq_packed2powers(data_object["iq_data"])
+            data_fraction=0.05 #5 percent seems to work, change as you please
+            data_object["peaks"]=fitting.find_peaks(powers,data_fraction,data_object["start_frequency"],data_object["stop_frequency"]).tolist()
+        except:
+            data_object["peaks"] = [-1]
     return data_object
+
 _all_calibrations.append(widescan_calibration)
 
 

@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import cmath
+import logging
 from scipy.optimize import least_squares
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
@@ -390,10 +391,10 @@ def sidecar_fit_transmission(powers, frequencies, logger):
 
     fit_shape = func_sc_pow_transmitted(frequencies, *pow_fit_param)
 
-    logger.info("fit norm {}".format(del_y_fit))
-    logger.info("f0 fit {}".format(fo_fit))
-    logger.info("Q fit {}".format(Q_fit))
-    logger.info("Background level {}".format(C_fit))
+    # logger.info("fit norm {}".format(del_y_fit))
+    # logger.info("f0 fit {}".format(fo_fit))
+    # logger.info("Q fit {}".format(Q_fit))
+    # logger.info("Background level {}".format(C_fit))
     logger.info("reduced chi-square {}".format(red_chisq))
 
     # turn numpy arrays to lists so that json can iterate through it.
@@ -401,7 +402,14 @@ def sidecar_fit_transmission(powers, frequencies, logger):
     # single number. I don't know.
     fit_shape = fit_shape.tolist()
 
-    return [del_y_fit, fo_fit, Q_fit, C_fit, red_chisq, fit_shape]
+    to_return = {}
+    to_return["fit_norm"] = del_y_fit
+    to_return["fit_f0"] = fo_fit
+    to_return["fit_Q"] = Q_fit
+    to_return["fit_noise"] = C_fit
+    to_return["fit_chisq"] = red_chisq
+    to_return["fit_shape"] = fit_shape
+    return to_return
 
 
 def search_sign(f0,frequencies,phases):
@@ -469,13 +477,13 @@ def sidecar_fit_reflection(iq_data, frequencies, logger):
 
     dip_depth = np.sqrt(del_y_fit)
     
-    logger.info("norm {}".format(C_fit))
-    logger.info("phase {}".format(Gam_c_phase_fo))
-    logger.info("f0 fit {}".format(fo_fit))
-    logger.info("Q fit {}".format(Q_fit))
-    logger.info("beta fit {}".format(beta))
+    # logger.info("norm {}".format(C_fit))
+    # logger.info("phase {}".format(Gam_c_phase_fo))
+    # logger.info("f0 fit {}".format(fo_fit))
+    # logger.info("Q fit {}".format(Q_fit))
+    # logger.info("beta fit {}".format(beta))
     logger.info("reduced chi-square {}".format(red_chisq))
-    logger.info("dip depth {}".format(dip_depth))
+    # logger.info("dip depth {}".format(dip_depth))
 
     # turn numpy arrays to lists so that json can iterate through it.
     # apparently, json can't deal with numpy objects, even if they are just a
@@ -483,8 +491,18 @@ def sidecar_fit_reflection(iq_data, frequencies, logger):
     Gam_c_phase_fo_from_interp = Gam_c_phase_fo.tolist() 
     fit_shape = fit_shape.tolist()
 
-    return [C_fit, Gam_c_phase_fo_from_interp, fo_fit, Q_fit, beta,
-            delay_time, red_chisq, fit_shape, dip_depth]
+    to_return = {}
+    to_return["fit_norm"] = C_fit
+    to_return["fit_phase"] = Gam_c_phase_fo_from_interp
+    to_return["fit_f0"] = fo_fit
+    to_return["fit_Q"] = Q_fit
+    to_return["fit_beta"] = beta
+    to_return["fit_delay_time"] = delay_time
+    to_return["fit_chisq"] = red_chisq
+    to_return["fit_shape"] = fit_shape
+    to_return["dip_depth"] = dip_depth
+    
+    return to_return
 
 def find_peaks(vec,fraction,start,stop):
 #examine the fraction*number top values in vec and return an array contiguous sections
