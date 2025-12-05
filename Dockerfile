@@ -9,7 +9,9 @@ COPY . /usr/local/src/sagebrush
 RUN apt-get update && apt-get install -y curl && \
     curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
     chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/ && \
-    pip install --index-url=https://www.piwheels.org/simple pyModbusTCP numpy scipy && \
+    echo $(uname -m)
+    pip install --index-url=https://www.piwheels.org/simple scipy && \
+    pip install pyModbusTCP && \
     cd /usr/local/src/sagebrush && \
     pip install .
 
