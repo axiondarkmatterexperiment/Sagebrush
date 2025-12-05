@@ -1,7 +1,13 @@
 __all__ = []
 
 from .functions import *
-from .network_analyzer_fits import *
+# If we can't import scipy, leave out network_analyzer_fits
+try:
+    import scipy
+except:
+    pass
+else:
+    from .network_analyzer_fits import *
 
 import logging
 logger = logging.getLogger(__name__)
