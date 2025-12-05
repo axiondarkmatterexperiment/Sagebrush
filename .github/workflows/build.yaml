@@ -47,8 +47,7 @@ jobs:
             img_user=${{ env.BASE_IMAGE_USER }}
             img_repo=${{ env.BASE_IMAGE_REPO }}
             img_tag=${{ env.BASE_IMAGE_TAG }}
-          platforms: linux/arm/v7
-#          platforms: linux/amd64
+          platforms: linux/amd64
 
 # For debugging
 #      - name: Setup tmate session
