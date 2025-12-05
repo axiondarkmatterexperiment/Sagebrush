@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name="Sagebrush"
 # dynamic = ["version"]
-version = "v0.0.1"
+version = "v0.1.1"
 dependencies = [
     "dripline",
 ]
@@ -15,5 +15,5 @@ where = ["."]  # list of folders that contain the packages (["."] by default)
 include = ["dripline.extensions", "dripline.extensions.*","sagebrush","sagebrush.*"]  # package names should match these glob patterns (["*"] by default)
 exclude = ["Dockerfile", "examples"]
 
-[tool.setuptools.dynamic]
-version = {attr = "my_package.VERSION"}
+#[tool.setuptools.dynamic]
+#version = {attr = "my_package.VERSION"}
