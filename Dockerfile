@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y curl && \
     echo "Architecture: ${arch}" && \
     pip_installs="pyModbusTCP numpy" && \
     if [[ $arch != arm ]] && [[ $arch != "armv7"* ]]; then \
-        pip_installs="${pip_installs} scipy" && \
+        pip_installs="${pip_installs} scipy"; \
     fi && \
     pip3 install ${pip_installs} && \
     cd /usr/local/src/sagebrush && \
