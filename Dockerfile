@@ -4,14 +4,21 @@ ARG img_tag=v5.1.2
 
 FROM ${img_user}/${img_repo}:${img_tag}
 
+SHELL ["/bin/bash", "-c"]
+
 COPY . /usr/local/src/sagebrush
 
-RUN apt-get update && apt-get install -y curl && \
+RUN apt-get update && apt-get install -y curl wget && \
     curl -O https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.7.8/bin/rabbitmqadmin && \
     chmod +x rabbitmqadmin && mv rabbitmqadmin /usr/local/bin/ && \
-    echo $(uname -m) && \
-    pip install --index-url=https://www.piwheels.org/simple scipy && \
-    pip install pyModbusTCP && \
+    arch=$(uname -m) && \
+    echo "architecture: ${arch}" && \
+    if [[ $arch == arm ]] || [[ $arch == "armv7"* ]]; then \
+        echo "Yes, this is arm or armv7" && \
+        wget https://www.piwheels.org/simple/scipy/scipy-1.16.3-cp311-cp311-linux_armv7l.whl#sha256=d9466489287e758403b3245da07149677abeb32f3e5f63b0b095cb7805b4b857 && \
+        pip install scipy-1.16.3-cp311-cp311-linux_armv7l.whl; \
+    fi && \
+    pip install pyModbusTCP numpy scipy && \
     cd /usr/local/src/sagebrush && \
     pip install .
 
