@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name="Sagebrush"
 # dynamic = ["version"]
-version = "v0.1.1"
+version = "v0.2.2"
 dependencies = [
     "dripline",
 ]
