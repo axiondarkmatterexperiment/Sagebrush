@@ -1,6 +1,7 @@
 import re
 import socket
 import threading
+import time
 
 from dripline.core import Service, ThrowReply, Entity, calibrate
 
@@ -58,6 +59,9 @@ class JACOBTemperature(Entity):
     def on_get(self):
         result=self.service.send_to_device(self.cmd_str)
         result = result.split(',')
+        if len(result)!=4:
+            logger.warning("response to temperature invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to temperature request")
         return result[1] # return the temperature in Kelvin
 
 __all__.append('JACOBPressure')
@@ -87,8 +91,162 @@ class JACOBPressure(Entity):
     def on_get(self):
         result=self.service.send_to_device(self.cmd_str)
         result = result.split(',')
+        if len(result)!=4:
+            logger.warning("response to pressure invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pressure request")
+
         return result[1] # return the pressure in mbar
     
+__all__.append('JACOBHeater')
+class JACOBHeater(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+        """ Example: readHtrPwr(1) returns a string containing heater power data for heater #1 from the
+LS370. The return type is String and contains 3 coma separated values.
+Example: 0.000000,12:23:05.632 06/13/2014,0
+0.000000 = this string consists of the heater output value and a letter that corresponds
+to the units of power: no letter – W, m – mW, u – uW, n - nW
+11:54:33.985 06/13/2014 = the time the measurement was recorded
+0 = Status (See Status Summary)"""
+
+    def correct_power(self,power):
+        #handles the m, n, or whatever suffixes.  Totally made AI do this
+        if power[-1] in ['m','u','n']:
+            scale = {'m':1e-3,'u':1e-6,'n':1e-9}
+            return float(power[:-1]) * scale[power[-1]]
+        else:
+            return float(power)
+        
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        result = result.split(',')
+        if len(result)!=3:
+            logger.warning("response to heater power invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to heater power request")
+
+        return self.correct_power(result[0]) # return the heater power value with units letter
+    
+__all__.append('JACOBValve')
+class JACOBValve(Entity):
+    def __init__(self,
+                    cmd_str=None,
+                    **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """The return type is String and contains 3 coma separated values.
+       Example: 0,11:41:46.816 06/13/2014,0
+       0 = the status of V1 (1 = Open, 0 = Closed)
+       11:41:46.816 06/13/2014 = The time the command was sent
+       0 = Status (See Status Summary)"""
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        if len(result)==0:
+            logger.warning("response to valve invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to valve request")
+
+
+        #Not sure about response format, but I think it is just a single integer
+        logger.debug("Valve status response: {}".format(result))
+        return result[0] # return the valve status (0=closed, 1=open)
+
+__all__.append('JACOBPumpStatus')
+class JACOBPumpStatus(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ This isn't documented in the manual, but the command is getPumpState(0)"""
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        if len(result)==0:
+            logger.warning("response to pump status invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pump status request")
+
+        #Response is status,warn,error
+        logger.debug("Pump status response: {}".format(result))
+        return result.split(',')[0] # return the pump status (0=stopped, 1=running?)
+
+__all__.append('JACOBPumpWarn')
+class JACOBPumpWarn(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ This isn't documented in the manual, but the command is getPumpState(0)"""
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        if len(result)==0:
+            logger.warning("response to pump status invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pump status request")
+
+        #Response is status,warn,error
+        logger.debug("Pump status response: {}".format(result))
+        return result.split(',')[1] # return the pump status (0=stopped, 1=running?)
+
+__all__.append('JACOBPumpError')
+class JACOBPumpError(Entity):
+    def __init__(self,
+                 cmd_str=None,
+                 **kwargs):
+        '''
+        Args:
+            cmd_str (str): query string to send to jacob
+        '''
+        Entity.__init__(self, **kwargs)
+        if cmd_str is None:
+            raise ThrowReply('service_error_invalid_value', '<base_str> is required to __init__ SimpleSCPIEntity instance')
+        else:
+            self.cmd_str = cmd_str
+    """ This isn't documented in the manual, but the command is getPumpState(0)"""
+    @calibrate()
+    def on_get(self):
+        result=self.service.send_to_device(self.cmd_str)
+        if len(result)==0:
+            logger.warning("response to pump status invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to pump status request")
+
+        #Response is status,warn,error
+        logger.debug("Pump status response: {}".format(result))
+        return result.split(',')[2] # return the pump status (0=stopped, 1=running?)
+
+
 __all__.append('JACOBFlow')
 class JACOBFlow(Entity):
     def __init__(self,
@@ -115,6 +273,11 @@ class JACOBFlow(Entity):
     def on_get(self):
         result=self.service.send_to_device(self.cmd_str)
         result = result.split(',')
+        if len(result)!=4:
+            logger.warning("response to flow invalid: {}".format(result))
+            raise ThrowReply('resource_error',"Invalid response to flow request")
+
+
         return result[1] # return the flow in uMoles/s
 
 
@@ -192,6 +355,7 @@ class JACOBService(Service):
         self.alock.acquire()
 
         try:
+            time.sleep(0.2)
             data = self._send_command(command)
         except socket.error as err:
             logger.warning(f"socket.error <{err}> received, attempting reconnect")
