@@ -48,7 +48,7 @@ def semicolon_array_to_json_object(data_string,label_array):
 _all_calibrations.append(semicolon_array_to_json_object)
 
 def debug_calibration(data_object):
-    logger.info("data string zero is {}".format(data_object["start_frequency"]))
+    logger.debug("data string zero is {}".format(data_object["start_frequency"]))
     return data_object
 _all_calibrations.append(debug_calibration)
 
@@ -67,8 +67,10 @@ def transmission_calibration(data_object):
         fit_noise: <number>
         fit_chisq: <number>
           }
+
+        If received data is incomplete or fit fails, returns dummy data in the proper data structure
     """
-    
+   
     if data_object is None:
         data_object = {}
         data_object["start_frequency"] = -1
@@ -80,8 +82,6 @@ def transmission_calibration(data_object):
         data_object["fit_noise"]=-1
         data_object["fit_chisq"]=-1
         data_object["fit_shape"]=-1
-        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-        # logger.warning("Invalid data_object received; unable to fit")
     else:
         try:
             freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
@@ -100,8 +100,6 @@ def transmission_calibration(data_object):
             data_object["fit_noise"]=-1
             data_object["fit_chisq"]=-1
             data_object["fit_shape"]=-1
-            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-            # logger.warning("Transmission fit failed to converge. Check IQ data")
     
     return data_object
 
@@ -122,6 +120,8 @@ def sidecar_transmission_calibration(data_object):
         fit_noise: <number>
         fit_chisq: <number>
           }
+
+        If incomplete data is received or fit fails, returns dummy values in the proper data structure
     """
     
     if data_object is None:
@@ -135,13 +135,11 @@ def sidecar_transmission_calibration(data_object):
         data_object["fit_noise"]=-1
         data_object["fit_chisq"]=-1
         data_object["fit_shape"]=-1
-        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-        # logger.warning("Invalid data_object received; unable to fit")
     else:
         try:
             freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
             powers=fitting.iq_packed2powers(data_object["iq_data"])
-            fit_dict=fitting.sidecar_fit_transmission(powers,freqs)
+            fit_dict=fitting.sidecar_fit_transmission(powers,freqs,logger)
             data_object["fit_norm"]=fit_dict["fit_norm"]
             data_object["fit_f0"]=fit_dict["fit_f0"]
             data_object["fit_Q"]=fit_dict["fit_Q"]
@@ -155,8 +153,6 @@ def sidecar_transmission_calibration(data_object):
             data_object["fit_noise"]=-1
             data_object["fit_chisq"]=-1
             data_object["fit_shape"]=-1
-            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-            # logger.warning("Transmission fit failed to converge. Check IQ data")
     
     return data_object
 
@@ -177,6 +173,7 @@ def reflection_calibration(data_object):
         fit_noise: <number>
         fit_chisq: <number>
           }
+        If incomplete data is received or fit fails, returns dummy data in the proper data structure
     """
     
     if data_object is None:
@@ -192,8 +189,6 @@ def reflection_calibration(data_object):
         data_object["fit_chisq"]=-1
         data_object["fit_shape"]=-1
         data_object["dip_depth"]=-1
-        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-        # logger.warning("Invalid data_object received; unable to fit")
     else:
         try:
             freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
@@ -216,8 +211,6 @@ def reflection_calibration(data_object):
             data_object["fit_chisq"]=-1
             data_object["fit_shape"]=-1
             data_object["dip_depth"]=-1
-            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-            # logger.warning("Reflection fit failed to converge. Check IQ data")
     
     return data_object
 
@@ -239,6 +232,7 @@ def sidecar_reflection_calibration(data_object):
         fit_noise: <number>
         fit_chisq: <number>
           }
+        If incomplete data is received or fit fails, returns dummy data in the proper data structure
     """
     
     if data_object is None:
@@ -254,12 +248,10 @@ def sidecar_reflection_calibration(data_object):
         data_object["fit_chisq"]=-1
         data_object["fit_shape"]=-1
         data_object["dip_depth"]=-1
-        # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-        # logger.warning("Invalid data_object received; unable to fit")
     else:
         try:
             freqs=np.linspace(data_object["start_frequency"],data_object["stop_frequency"],int(len(data_object["iq_data"])/2))
-            fit_dict=fitting.sidecar_fit_reflection(data_object["iq_data"],freqs)
+            fit_dict=fitting.sidecar_fit_reflection(data_object["iq_data"],freqs,logger)
             data_object["fit_norm"]=fit_dict["fit_norm"]
             data_object["fit_phase"]=fit_dict["fit_phase"]
             data_object["fit_f0"]=fit_dict["fit_f0"]
@@ -278,8 +270,6 @@ def sidecar_reflection_calibration(data_object):
             data_object["fit_chisq"]=-1
             data_object["fit_shape"]=-1
             data_object["dip_depth"]=-1
-            # Not currently sending a log entry to limit log size, and because it likely won't help catch this error
-            # logger.warning("Reflection fit failed to converge. Check IQ data")
     
     return data_object
 
@@ -296,6 +286,7 @@ def widescan_calibration(data_object):
           {
         peak_freqs: <array of frequencies>
           }
+        If incomplete data is received, returns dummy data
     """
     
     if data_object is None:

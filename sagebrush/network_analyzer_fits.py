@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import cmath
-import logging
 from scipy.optimize import least_squares
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
@@ -373,10 +372,12 @@ def sidecar_fit_transmission(powers, frequencies, logger):
     Gamma is the measured reflection coefficient"""
 
     if len(frequencies)!=len(powers):
+        logger.debug("point count not right nfreqs {} npows {}".format(len(frequencies),len(powers)))
         raise ValueError("point count not right nfreqs {} npows {}".format(len(frequencies),len(powers)))
     if len(frequencies)<16:
+        logger.debug("not enough points to fit transmission, need 16, got {}".format(len(powers)))
         raise ValueError("not enough points to fit transmission, need 16, got {}".format(len(powers)))
-
+    
     sig_powers = sc_estimate_power_uncertainty(powers)
     po_guess = sc_guess_fit_params(frequencies, powers, "transmission")
 
@@ -390,12 +391,6 @@ def sidecar_fit_transmission(powers, frequencies, logger):
                                func_sc_pow_transmitted, pow_fit_param)
 
     fit_shape = func_sc_pow_transmitted(frequencies, *pow_fit_param)
-
-    # logger.info("fit norm {}".format(del_y_fit))
-    # logger.info("f0 fit {}".format(fo_fit))
-    # logger.info("Q fit {}".format(Q_fit))
-    # logger.info("Background level {}".format(C_fit))
-    logger.info("reduced chi-square {}".format(red_chisq))
 
     # turn numpy arrays to lists so that json can iterate through it.
     # apparently, json can't deal with numpy objects, even if they are just a
@@ -450,7 +445,6 @@ def sidecar_fit_reflection(iq_data, frequencies, logger):
                                func_sc_pow_reflected, pow_fit_param)
     
     
-    
         # Gam_c is reflection coeffient Gamma of the cavity
     Gam_c_mag, Gam_c_phase = sc_reflection_deconvolve_line(frequencies, Gamma_mag, 
                                                            Gamma_phase, C_fit)
@@ -459,9 +453,9 @@ def sidecar_fit_reflection(iq_data, frequencies, logger):
     Gam_c_mag_fo = np.sqrt(func_sc_pow_reflected(fo_fit, *pow_fit_param)*1/C_fit)
     
     Gam_c_interp_phase = interp1d(frequencies, Gam_c_phase, kind='cubic')
-
     # calculate phase of Gamma_cavity at resonant frequency by interpolating
     # data.
+    # Throws an error if fitted f0 is outside the measured frequency range
     Gam_c_phase_fo = Gam_c_interp_phase(fo_fit)
 
     sign_phase = search_sign(fo_fit,frequencies,Gam_c_phase)
@@ -477,14 +471,6 @@ def sidecar_fit_reflection(iq_data, frequencies, logger):
 
     dip_depth = np.sqrt(del_y_fit)
     
-    # logger.info("norm {}".format(C_fit))
-    # logger.info("phase {}".format(Gam_c_phase_fo))
-    # logger.info("f0 fit {}".format(fo_fit))
-    # logger.info("Q fit {}".format(Q_fit))
-    # logger.info("beta fit {}".format(beta))
-    logger.info("reduced chi-square {}".format(red_chisq))
-    # logger.info("dip depth {}".format(dip_depth))
-
     # turn numpy arrays to lists so that json can iterate through it.
     # apparently, json can't deal with numpy objects, even if they are just a
     # single number. I don't know.
@@ -522,7 +508,6 @@ def find_peaks(vec,fraction,start,stop):
         last_num=sorted_max_indices[i]
     peak_centroids.append(int(0.5*( peak_start+sorted_max_indices[-1])))
     return np.interp(peak_centroids,[0,len(vec)],[start,stop])
-
 
 def fit_na_log(log_entry):
     if type(log_entry) is dict:
