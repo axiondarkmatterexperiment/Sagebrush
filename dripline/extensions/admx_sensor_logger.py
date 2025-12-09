@@ -45,7 +45,6 @@ class ADMXSensorLogger(PostgresSensorLogger):
             where_eq_dict_local ={self._sensor_type_match_column: sensor_name}
             column_name = self._sensor_type_column_name
             this_type = this_table.do_select(return_cols=[column_name], where_eq_dict=where_eq_dict_local)
-            logger.debug(f"{this_type}")
             if not this_type[1]:
                 logger.critical('endpoint with name "{}" was not found in database hence failed to log its value; might need to add it to the db'.format(sensor_name))
                 return
@@ -63,11 +62,9 @@ class ADMXSensorLogger(PostgresSensorLogger):
                     insert_data = {'timestamp': a_message_timestamp}
                     insert_data.update(a_routing_key_data)
                     insert_data.update(a_payload.to_python())
-                    logger.info(f"Inserting from endpoint {self._data_tables_dict[sensor_type]}; data are:\n{insert_data}")
                     # do the insert
                     insert_return = this_data_table.do_insert(**insert_data)
-                    logger.debug(f"Return from insertion: {insert_return}")
-                    logger.info("finished processing data")
+                    logger.info("finished processing data for %s",self._data_tables_dict[sensor_type])
         except sqlalchemy.exc.SQLAlchemyError as err:
             logger.critical(f'Received SQL error while doing insert: {err}')
         except Exception as err:
@@ -93,7 +90,6 @@ class ADMXSpecLogger(ADMXSensorLogger):
             where_eq_dict_local ={self._sensor_type_match_column: sensor_name}
             column_name = self._sensor_type_column_name
             this_type = this_table.do_select(return_cols=[column_name], where_eq_dict=where_eq_dict_local)
-            logger.debug(f"{this_type}")
             if not this_type[1]:
                 logger.critical('endpoint with name "{}" was not found in database hence failed to log its value; might need to add it to the db'.format(sensor_name))
                 return
@@ -119,7 +115,6 @@ class ADMXSpecLogger(ADMXSensorLogger):
                             logger.info(f"Inserting from endpoint {table_name_i}; data test:\n{insert_data['value_raw'][0]}")
                             # do the insert
                             insert_return = this_data_table.do_insert(**insert_data)
-                            logger.debug(f"Return from insertion: {insert_return}")
                         else:
                             this_mean = float(np.mean(the_spec))
                             this_std = float(np.std(the_spec))
@@ -127,12 +122,10 @@ class ADMXSpecLogger(ADMXSensorLogger):
                                                 "raw_value": this_mean, "calibrated_value":this_mean})
                             logger.info(f"Inserting from endpoint {table_name_i}; data test:\n{insert_data}")
                             insert_return = this_data_table.do_insert(**insert_data)
-                            logger.debug(f"Return from insertion mean: {insert_return}")
                             insert_data.update({"sensor_name": this_data_table._sensor_name_std,
                                                 "raw_value": this_std, "calibrated_value":this_std})
                             logger.info(f"Inserting from endpoint {table_name_i}; data test:\n{insert_data}")
                             insert_return = this_data_table.do_insert(**insert_data)
-                            logger.debug(f"Return from insertion std: {insert_return}")
                     logger.info("finished processing data")
 
 
