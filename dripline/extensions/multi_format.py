@@ -268,7 +268,7 @@ def sidecar_reflection_calibration(data_object):
             data_object["fit_beta"]=-1
             data_object["fit_delay_time"]=-1
             data_object["fit_chisq"]=-1
-            data_object["fit_shape"]=-1
+            data_object["fit_shape"]=[-1]*len(data_object["iq_data"])
             data_object["dip_depth"]=-1
     
     return data_object
