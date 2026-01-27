@@ -59,5 +59,5 @@ class plc_bool(Entity):
     def on_get(self):
         raw_bits_data = self.service.read_holding(self.register, self.n_registers)
         logger.debug('raw bits are: {}'.format(raw_bits_data))
-        this_state = bool(raw_bits_data[0] & 2**self.bit)
+        this_state = str(bool(raw_bits_data[0] & 2**self.bit))
         return this_state
