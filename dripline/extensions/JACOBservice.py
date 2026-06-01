@@ -166,7 +166,7 @@ class JACOBValve(Entity):
 
         #Not sure about response format, but I think it is just a single integer
         logger.debug("Valve status response: {}".format(result))
-        return result[0] # return the valve status (0=closed, 1=open)
+        return result.split(',')[0] # return the valve status (0=closed, 1=open)
 
 __all__.append('JACOBPumpStatus')
 class JACOBPumpStatus(Entity):
