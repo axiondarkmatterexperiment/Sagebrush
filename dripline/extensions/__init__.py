@@ -15,3 +15,4 @@ from .muxer_service import *
 from .plc import *
 from .prologix_service import *
 from .unstable_format import *
+from .bash_script_runner import *

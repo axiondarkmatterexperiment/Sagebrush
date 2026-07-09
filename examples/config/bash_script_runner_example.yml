@@ -1,0 +1,10 @@
+runtime-config:
+  name: my_bash_runner
+  module: Service
+  auth_file: /root/auths.json
+  endpoints:
+    - name: run_task
+      module: BashScriptRunner
+      script_path: /scripts/example_task.sh
+      timeout: 60
+      pass_via: env
